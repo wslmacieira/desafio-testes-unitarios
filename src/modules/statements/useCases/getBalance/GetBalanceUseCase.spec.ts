@@ -38,7 +38,7 @@ describe("Get Balance", () => {
       user_id: newUser.id!,
       type: OperationType.DEPOSIT,
       amount: 250,
-      description: "Freelas",
+      description: "Deposit",
     });
 
     const result = await getBalanceUseCase.execute({ user_id: newUser.id! });
@@ -46,7 +46,7 @@ describe("Get Balance", () => {
     expect(result).toHaveProperty("balance");
   });
 
-  it("should not be able get balance a nonexists user", () => {
+  it("should not be able get balance a nonexistent user", () => {
     expect(async () => {
       await getBalanceUseCase.execute({ user_id: "user_id" });
     }).rejects.toBeInstanceOf(GetBalanceError);

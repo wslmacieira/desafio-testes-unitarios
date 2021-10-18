@@ -21,35 +21,48 @@ describe("Create Statement", () => {
     );
   });
 
-  it("should be able create a new statement", async () => {
+  it("should be able create a new deposit", async () => {
     const newUser = await createUserUseCase.execute({
       name: "User test",
       email: "user_test@email.com.br",
       password: "123456",
     });
 
-    const newStatement = await createStatementUseCase.execute({
-      user_id: newUser.id!,
+    const deposit = await createStatementUseCase.execute({
+      user_id: newUser.id as string,
       type: OperationType.DEPOSIT,
       amount: 250,
-      description: "Freelas",
+      description: "Deposit",
     });
 
-    expect(newStatement).toHaveProperty("id");
+    expect(deposit).toHaveProperty("id");
   });
 
-  it('should not be able create a statement with user not exists', async () => {
-    expect(async () => {
-      await createStatementUseCase.execute({
-        user_id: 'user_id',
-        type: OperationType.DEPOSIT,
-        amount: 250,
-        description: "Freelas",
-      })
-    }).rejects.toBeInstanceOf(CreateStatementError.UserNotFound)
+  it("should be able create a new withdraw", async () => {
+    const newUser = await createUserUseCase.execute({
+      name: "User test",
+      email: "user_test@email.com.br",
+      password: "123456",
+    });
+
+    await createStatementUseCase.execute({
+      user_id: newUser.id as string,
+      type: OperationType.DEPOSIT,
+      amount: 250,
+      description: "Deposit",
+    });
+
+    const withdraw = await createStatementUseCase.execute({
+      user_id: newUser.id as string,
+      type: OperationType.WITHDRAW,
+      amount: 150,
+      description: "Withdraw",
+    });
+
+    expect(withdraw).toHaveProperty("id");
   });
 
-  it('should not be able create a statement with insufficientFunds', async () => {
+  it("should not be able create a new withdraw with insufficient funds", async () => {
     const user = await createUserUseCase.execute({
       name: "User test",
       email: "user_test@email.com.br",
@@ -57,11 +70,22 @@ describe("Create Statement", () => {
     });
     expect(async () => {
       await createStatementUseCase.execute({
-        user_id: user.id!,
+        user_id: user.id as string,
         type: OperationType.WITHDRAW,
         amount: 250,
-        description: "Aluguel",
-      })
-    }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds)
+        description: "Withdraw",
+      });
+    }).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds);
+  });
+
+  it("should not be able create a statement with nonexistent user", async () => {
+    expect(async () => {
+      await createStatementUseCase.execute({
+        user_id: "user_id",
+        type: OperationType.DEPOSIT,
+        amount: 250,
+        description: "Deposit",
+      });
+    }).rejects.toBeInstanceOf(CreateStatementError.UserNotFound);
   });
 });

@@ -35,21 +35,21 @@ describe("Get Statement Operation", () => {
     });
 
     const newStatement = await createStatementUseCase.execute({
-      user_id: newUser.id!,
+      user_id: newUser.id as string,
       type: OperationType.DEPOSIT,
       amount: 250,
-      description: "Freelas",
+      description: "Deposit",
     });
 
     const operation = await getStatementOperationUseCase.execute({
-      user_id: newUser.id!,
-      statement_id: newStatement.id!,
+      user_id: newUser.id as string,
+      statement_id: newStatement.id as string,
     });
 
     expect(operation).toHaveProperty("id");
   });
 
-  it("should not be able get statement operation nonexists user", () => {
+  it("should not be able get statement operation nonexistent user", () => {
     expect(async () => {
       const newUser = await createUserUseCase.execute({
         name: "User test",
@@ -58,19 +58,23 @@ describe("Get Statement Operation", () => {
       });
 
       const newStatement = await createStatementUseCase.execute({
-        user_id: newUser.id!,
+        user_id: newUser.id as string,
         type: OperationType.DEPOSIT,
         amount: 250,
-        description: "Freelas",
+        description: "Deposit",
       });
-      await getStatementOperationUseCase.execute({
-        user_id: "user_id",
-        statement_id: newStatement.id!,
-      });
-    }).rejects.toBeInstanceOf(GetStatementOperationError.UserNotFound);
+      await getStatementOperationUseCase
+        .execute({
+          user_id: "user_id",
+          statement_id: newStatement.id as string,
+        })
+        .catch((error) => {
+          expect(error).toBeInstanceOf(GetStatementOperationError.UserNotFound);
+        });
+    });
   });
 
-  it("should not be able get statement operation nonexists user", () => {
+  it("should not be able get statement operation nonexistent user", () => {
     expect(async () => {
       const newUser = await createUserUseCase.execute({
         name: "User test",
@@ -79,15 +83,21 @@ describe("Get Statement Operation", () => {
       });
 
       const newStatement = await createStatementUseCase.execute({
-        user_id: newUser.id!,
+        user_id: newUser.id as string,
         type: OperationType.DEPOSIT,
         amount: 250,
-        description: "Freelas",
+        description: "Deposit",
       });
-      await getStatementOperationUseCase.execute({
-        user_id: newUser.id!,
-        statement_id: "statement_id",
-      });
-    }).rejects.toBeInstanceOf(GetStatementOperationError.StatementNotFound);
+      await getStatementOperationUseCase
+        .execute({
+          user_id: newUser.id as string,
+          statement_id: "statement_id",
+        })
+        .catch((error) => {
+          expect(error).toBeInstanceOf(
+            GetStatementOperationError.StatementNotFound
+          );
+        });
+    });
   });
 });
